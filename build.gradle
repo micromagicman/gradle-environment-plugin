@@ -1,15 +1,19 @@
 plugins {
-    id 'maven-publish'
-    id 'java-gradle-plugin'
+    id 'com.gradle.plugin-publish' version '1.2.1'
 }
 
 group = 'ru.micromagicman'
-version = '1.0.0-SNAPSHOT'
+version = '0.1.0'
 
 gradlePlugin {
+    website = 'https://github.com/micromagicman/gradle-environment-plugin'
+    vcsUrl = 'https://github.com/micromagicman/gradle-environment-plugin'
     plugins {
-        create("gradle-environment-plugin") {
+        create('gradle-environment-plugin') {
             id = 'ru.micromagicman.environment'
+            displayName = 'gradle-environment-plugin'
+            description = 'Gradle plugin for attaching environment variables to task execution'
+            tags = ['.env', 'environment', 'task-environment']
             implementationClass = 'ru.micromagicman.gradle.environment.EnvironmentPlugin'
         }
     }

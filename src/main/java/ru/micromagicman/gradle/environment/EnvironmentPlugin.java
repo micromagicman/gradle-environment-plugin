@@ -7,17 +7,20 @@ import org.gradle.process.ProcessForkOptions;
 
 import java.io.FileNotFoundException;
 
+/**
+ * Environment plugin implementation.<br/>
+ * This plugin attaches all variables from project .env file to all gradle task,
+ * which implements {@link ProcessForkOptions process fork functionality}.
+ *
+ * @author micromagicman
+ */
 public class EnvironmentPlugin implements Plugin<Project> {
 
     @Override
     public void apply( final Project project ) {
         final TaskContainer tasks = project.getTasks();
         final EnvFile environmentFile;
-        try {
-            environmentFile = EnvFile.forProject( project );
-        } catch ( FileNotFoundException e ) {
-            throw new RuntimeException( e );
-        }
+        environmentFile = EnvFile.forProject( project );
         tasks.all( task -> {
             if ( task instanceof ProcessForkOptions processForkTask ) {
                 environmentFile.applyForTask( processForkTask );

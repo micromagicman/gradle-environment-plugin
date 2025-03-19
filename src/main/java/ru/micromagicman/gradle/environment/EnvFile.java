@@ -36,7 +36,7 @@ class EnvFile extends File {
     }
 
     @NonNull
-    static EnvFile forProject( final Project project ) throws FileNotFoundException {
+    static EnvFile forProject( final Project project ) {
         return new EnvFile( project.getProjectDir(), DEFAULT_FILE_NAME );
     }
 
