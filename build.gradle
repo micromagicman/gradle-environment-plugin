@@ -1,15 +1,32 @@
 plugins {
-    id 'java'
+    id 'maven-publish'
+    id 'java-gradle-plugin'
 }
 
 group = 'ru.micromagicman'
 version = '1.0.0-SNAPSHOT'
 
+gradlePlugin {
+    plugins {
+        create("gradle-environment-plugin") {
+            id = 'ru.micromagicman.environment'
+            implementationClass = 'ru.micromagicman.gradle.environment.EnvironmentPlugin'
+        }
+    }
+}
+
 repositories {
     mavenCentral()
 }
 
+def lombok = 'org.projectlombok:lombok:1.18.34'
+
 dependencies {
+    compileOnly lombok
+    annotationProcessor lombok
+    testCompileOnly lombok
+    testAnnotationProcessor lombok
+    testImplementation 'org.mockito:mockito-core:3.+'
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }
