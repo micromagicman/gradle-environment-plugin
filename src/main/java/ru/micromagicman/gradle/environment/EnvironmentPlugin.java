@@ -5,8 +5,6 @@ import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.process.ProcessForkOptions;
 
-import java.io.FileNotFoundException;
-
 /**
  * Environment plugin implementation.<br/>
  * This plugin attaches all variables from project .env file to all gradle task,
