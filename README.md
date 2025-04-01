@@ -24,7 +24,7 @@ plugins {
 ```groovy
 buildscript {
     repositories {
-        mavenCentral()
+        gradlePluginPortal()
     }
     dependencies {
         classpath 'ru.micromagicman:environment-gradle-plugin:1.0.0'
