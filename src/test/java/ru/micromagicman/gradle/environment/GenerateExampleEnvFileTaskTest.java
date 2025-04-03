@@ -46,7 +46,11 @@ class GenerateExampleEnvFileTaskTest extends EnvironmentPluginTest {
         assertEquals( TaskOutcome.SUCCESS, task.getOutcome() );
         assertProjectFile(
                 ".env.example",
-                ""
+                """
+                        API_TOKEN=test-token
+                        OS_NAME=macos
+                        MILLION=1000000                        
+                        """
         );
     }
 }

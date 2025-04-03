@@ -7,9 +7,8 @@ import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * Task generates example environment file based on original environment file (which is basically excluded from VCS).
@@ -31,9 +30,13 @@ public class GenerateExampleEnvFileTask extends DefaultTask {
             if ( !createOutputFileIfDoesNotExists() ) {
                 throw new RuntimeException( "Cannot create file " + outputFile.getName() );
             }
-            try ( final OutputStream outputStream = new FileOutputStream( outputFile ) ) {
-                outputStream.write( "".getBytes() );
+            final EnvFile source = EnvFile.forProject( getProject() );
+            final EnvFile target = new EnvFile( outputFile.getParentFile(), outputFile.getName() );
+            final Map<String, String> sourceRecords = source.all();
+            for ( final String entry : sourceRecords.keySet() ) {
+                target.put( entry, sourceRecords.get( entry ) );
             }
+            target.flush();
         } catch ( IOException exception ) {
             throw new RuntimeException( exception );
         }

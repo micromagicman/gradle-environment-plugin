@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -42,7 +43,7 @@ class EnvFile extends File {
 
     @NonNull
     Map<String, String> all() {
-        return Map.copyOf( variables );
+        return Collections.unmodifiableMap( variables );
     }
 
     void applyForTask( final ProcessForkOptions processForkTask ) {
