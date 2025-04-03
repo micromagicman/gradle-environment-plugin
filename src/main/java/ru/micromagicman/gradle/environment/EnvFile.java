@@ -35,7 +35,7 @@ class EnvFile extends File {
 
     void put( final String name, final Object value ) {
         variables.put(
-                Objects.requireNonNull( name, "" ),
+                Objects.requireNonNull( name, "Key cannot be null" ),
                 null != value ? value.toString() : EMPTY_VALUE
         );
     }

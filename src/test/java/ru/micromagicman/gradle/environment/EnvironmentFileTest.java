@@ -45,6 +45,22 @@ class EnvironmentFileTest {
     }
 
     @Test
+    void testPutError() {
+        final EnvFile envFile = new EnvFile( null, ".env" );
+        assertThrows(
+                NullPointerException.class,
+                () -> envFile.put( null, "value" )
+        );
+    }
+
+    @Test
+    void testPutOk() {
+        final EnvFile envFile = new EnvFile( null, ".env" );
+        envFile.put( "key", "value" );
+        assertEquals( Map.of( "key", "value" ), envFile.all() );
+    }
+
+    @Test
     void testAll() {
         final EnvFile envFile = envFileFromResources( "sample1.env" );
         final Map<String, String> all = envFile.all();
