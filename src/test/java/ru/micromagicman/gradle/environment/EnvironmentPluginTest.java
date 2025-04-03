@@ -1,6 +1,5 @@
 package ru.micromagicman.gradle.environment;
 
-import lombok.extern.slf4j.Slf4j;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.GradleRunner;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,15 +21,13 @@ import java.util.regex.Pattern;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@Slf4j
 class EnvironmentPluginTest {
 
     private static final Pattern APPLICATION_OUTPUT_PATTERN =
             Pattern.compile( "Application started\n((?:[^\n]+\n)+)Application ended" );
 
-    private File projectDir;
+    protected File projectDir;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -126,44 +122,6 @@ class EnvironmentPluginTest {
         assertEnvironmentOutput( new String[]{ "test-token", "macos", "1000000" }, result );
     }
 
-    @Test
-    void testCreateExampleEnvFileTask() throws IOException {
-        createProjectFile(
-                "build.gradle",
-                """
-                        plugins {
-                            id 'java'
-                            id 'application'
-                            id 'ru.micromagicman.environment'
-                        }
-                                                
-                        generateExampleEnvFile {
-                            outputFile = file("$projectDir/.env.example")
-                        }
-                        """
-        );
-        createProjectFile(
-                ".env",
-                """
-                        API_TOKEN=test-token
-                        OS_NAME=macos
-                        MILLION=1000000
-                        """
-        );
-        final BuildResult result = GradleRunner.create()
-                .withProjectDir( projectDir )
-                .withArguments( "generateExampleEnvFile" )
-                .withPluginClasspath()
-                .build();
-        final BuildTask task = result.task( ":generateExampleEnvFile" );
-        assertNotNull( task );
-        assertEquals( TaskOutcome.SUCCESS, task.getOutcome() );
-        assertProjectFileExists(
-                ".env.example",
-                ""
-        );
-    }
-
     private void assertEnvironmentOutput( final String[] expectedOutput, final BuildResult result ) {
         final String output = result.getOutput();
         final Matcher matcher = APPLICATION_OUTPUT_PATTERN.matcher( output );
@@ -175,7 +133,7 @@ class EnvironmentPluginTest {
         assertArrayEquals( expectedOutput, environmentOutput.split( "\n" ) );
     }
 
-    private void createProjectFile( final String fileName, final String content ) throws IOException {
+    protected void createProjectFile( final String fileName, final String content ) throws IOException {
         final File buildFile = new File( projectDir, fileName );
         final File parentDir = buildFile.getParentFile();
         if ( !parentDir.exists() && !parentDir.mkdirs() ) {
@@ -186,7 +144,7 @@ class EnvironmentPluginTest {
         }
     }
 
-    private void assertProjectFileExists( final String expectedFileName, final String expectedFileContent ) throws IOException {
+    protected void assertProjectFile( final String expectedFileName, final String expectedFileContent ) throws IOException {
         final File[] found = projectDir.listFiles( file -> Objects.equals( expectedFileName, file.getName() ) );
         assertNotNull( found );
         assertEquals( 1, found.length, "Expected file not found: " + expectedFileName );
