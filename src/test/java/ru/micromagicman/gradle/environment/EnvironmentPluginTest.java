@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -117,6 +118,36 @@ class EnvironmentPluginTest {
         assertNotNull( run );
         assertEquals( TaskOutcome.SUCCESS, run.getOutcome() );
         assertEnvironmentOutput( new String[]{ "test-token", "macos", "1000000" }, result );
+    }
+
+    @Test
+    void testCreateExampleEnvFileTask() throws IOException {
+        createFile(
+                "build.gradle",
+                """
+                        plugins {
+                            id 'java'
+                            id 'application'
+                            id 'ru.micromagicman.environment'
+                        }
+                        """
+        );
+        createFile(
+                ".env",
+                """
+                        API_TOKEN=test-token
+                        OS_NAME=macos
+                        MILLION=1000000
+                        """
+        );
+        final BuildResult result = GradleRunner.create()
+                .withProjectDir( projectDir )
+                .withArguments( "generateExampleEnvFile" )
+                .withPluginClasspath()
+                .build();
+        final BuildTask task = result.task( ":generateExampleEnvFile" );
+        assertNotNull( task );
+        assertEquals( TaskOutcome.SUCCESS, task.getOutcome() );
     }
 
     private void assertEnvironmentOutput( final String[] expectedOutput, final BuildResult result ) {
