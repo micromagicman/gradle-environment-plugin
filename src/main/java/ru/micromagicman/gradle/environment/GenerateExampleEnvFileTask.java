@@ -28,7 +28,6 @@ public class GenerateExampleEnvFileTask extends DefaultTask {
     @TaskAction
     void execute() {
         try {
-            System.out.println( outputFile.getAbsolutePath() );
             if ( !createOutputFileIfDoesNotExists() ) {
                 throw new RuntimeException( "Cannot create file " + outputFile.getName() );
             }

@@ -144,12 +144,9 @@ class EnvironmentPluginTest {
         }
     }
 
-    protected void assertProjectFile( final String expectedFileName, final String expectedFileContent ) throws IOException {
-        final File[] found = projectDir.listFiles( file -> Objects.equals( expectedFileName, file.getName() ) );
-        assertNotNull( found );
-        assertEquals( 1, found.length, "Expected file not found: " + expectedFileName );
-        try ( final InputStream inputStream = new FileInputStream( found[0] ) ) {
-            assertEquals( expectedFileContent, new String( inputStream.readAllBytes() ) );
-        }
+    protected void assertProjectFile(
+            final String expectedFileName,
+            final String expectedFileContent ) throws IOException {
+        TestUtils.assertFileContents( projectDir, expectedFileName, expectedFileContent );
     }
 }
