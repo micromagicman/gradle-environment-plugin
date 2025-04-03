@@ -8,7 +8,8 @@ import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Task generates example environment file based on original environment file (which is basically excluded from VCS).
@@ -17,6 +18,11 @@ import java.util.Map;
 @Setter
 @Getter
 public class GenerateExampleEnvFileTask extends DefaultTask {
+
+    private static final List<String> DEFAULT_EXCLUSION_KEY_PATTERNS = List.of(
+            "password",
+            "token"
+    );
 
     /**
      * Output example environment file.
@@ -30,12 +36,15 @@ public class GenerateExampleEnvFileTask extends DefaultTask {
             if ( !createOutputFileIfDoesNotExists() ) {
                 throw new RuntimeException( "Cannot create file " + outputFile.getName() );
             }
-            final EnvFile source = EnvFile.forProject( getProject() );
             final EnvFile target = new EnvFile( outputFile.getParentFile(), outputFile.getName() );
-            final Map<String, String> sourceRecords = source.all();
-            for ( final String entry : sourceRecords.keySet() ) {
-                target.put( entry, sourceRecords.get( entry ) );
-            }
+            target.mergeWith( EnvFile.forProject( getProject() ), key -> {
+                for ( String pattern : DEFAULT_EXCLUSION_KEY_PATTERNS ) {
+                    if ( key.toLowerCase().contains( pattern ) ) {
+                        return false;
+                    }
+                }
+                return true;
+            } );
             target.flush();
         } catch ( IOException exception ) {
             throw new RuntimeException( exception );

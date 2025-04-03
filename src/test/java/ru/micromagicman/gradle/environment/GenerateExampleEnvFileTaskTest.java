@@ -47,7 +47,7 @@ class GenerateExampleEnvFileTaskTest extends EnvironmentPluginTest {
         assertProjectFile(
                 ".env.example",
                 """
-                        API_TOKEN=test-token
+                        API_TOKEN=
                         OS_NAME=macos
                         MILLION=1000000                        
                         """

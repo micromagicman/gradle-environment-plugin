@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 /**
  * Environment file.
@@ -32,6 +33,14 @@ class EnvFile extends File {
     EnvFile( final File parent, final String children ) {
         super( parent, children );
         this.variables = parseEnvironmentFile( this );
+    }
+
+    void mergeWith( final EnvFile other, final Predicate<String> keyPredicate ) {
+        for ( final Map.Entry<String, String> entry : other.variables.entrySet() ) {
+            final String key = entry.getKey();
+            final String value = keyPredicate.test( key ) ? entry.getValue() : null;
+            put( key, value );
+        }
     }
 
     void put( final String name, final Object value ) {
