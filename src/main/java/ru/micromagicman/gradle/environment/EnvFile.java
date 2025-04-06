@@ -18,23 +18,27 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
- * Environment file.
- * Consists of KEY=value lines.
+ * Represents an environment configuration file (.env) containing key-value pairs.
+ * <p>The file format follows standard .env conventions with one variable per line.
  */
 @Slf4j
 class EnvFile extends File {
 
     private static final String DEFAULT_FILE_NAME = ".env";
-
     private static final String EMPTY_VALUE = "";
-
     private final Map<String, String> variables;
 
+    /**
+     * Creates a new environment file instance.
+     */
     EnvFile( final File parent, final String children ) {
         super( parent, children );
         this.variables = parseEnvironmentFile( this );
     }
 
+    /**
+     * Merges this environment file with another, applying a key-filter predicate.
+     */
     void mergeWith( final EnvFile other, final Predicate<String> keyPredicate ) {
         for ( final Map.Entry<String, String> entry : other.variables.entrySet() ) {
             final String key = entry.getKey();
@@ -43,6 +47,9 @@ class EnvFile extends File {
         }
     }
 
+    /**
+     * Adds or updates an environment variable.
+     */
     void put( final String name, final Object value ) {
         variables.put(
                 Objects.requireNonNull( name, "Key cannot be null" ),
@@ -50,15 +57,24 @@ class EnvFile extends File {
         );
     }
 
+    /**
+     * Returns an unmodifiable view of all environment variables.
+     */
     @NonNull
     Map<String, String> all() {
         return Collections.unmodifiableMap( variables );
     }
 
+    /**
+     * Applies all environment variables to a Gradle task.
+     */
     void applyForTask( final ProcessForkOptions processForkTask ) {
         variables.forEach( processForkTask::environment );
     }
 
+    /**
+     * Writes all environment variables to disk in KEY=value format.
+     */
     void flush() {
         try ( final OutputStream outputStream = new FileOutputStream( this ) ) {
             for ( final Map.Entry<String, String> variable : variables.entrySet() ) {
@@ -69,11 +85,20 @@ class EnvFile extends File {
         }
     }
 
+    /**
+     * Creates an EnvFile instance for the given project's default location.
+     */
     @NonNull
     static EnvFile forProject( final Project project ) {
         return new EnvFile( project.getProjectDir(), DEFAULT_FILE_NAME );
     }
 
+    /**
+     * Parses an environment file into a map of key-value pairs.
+     * <p>
+     * Each non-empty line should contain KEY=value format.
+     * Blank lines and lines without '=' are ignored.
+     */
     @NonNull
     static Map<String, String> parseEnvironmentFile( final File file ) {
         final Map<String, String> variables = new LinkedHashMap<>();
