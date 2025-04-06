@@ -97,14 +97,13 @@ class EnvironmentFileTest {
 
     @Test
     void testFlushSuccess() throws IOException {
-        final File tempDirectory = Files.createTempDirectory( "flush-test" ).toFile();
-        final EnvFile envFile = new EnvFile( tempDirectory, ".env" );
+        final TestProject testProject = new TestProject( "flush-test" );
+        final EnvFile envFile = new EnvFile( testProject.directory, ".env" );
         envFile.put( "HELLO", "WORLD" );
         envFile.put( "THIS_IS_TRUE", true );
         envFile.put( "EMPTY", null );
         envFile.flush();
-        TestUtils.assertFileContents(
-                tempDirectory,
+        testProject.assertProjectFile(
                 ".env",
                 """
                         HELLO=WORLD

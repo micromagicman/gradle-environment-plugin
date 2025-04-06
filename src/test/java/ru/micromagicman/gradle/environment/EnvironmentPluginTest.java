@@ -7,11 +7,7 @@ import org.gradle.testkit.runner.TaskOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,16 +20,16 @@ class EnvironmentPluginTest {
     private static final Pattern APPLICATION_OUTPUT_PATTERN =
             Pattern.compile( "Application started\n((?:[^\n]+\n)+)Application ended" );
 
-    protected File projectDir;
+    private TestProject testProject;
 
     @BeforeEach
     void setUp() throws IOException {
-        projectDir = Files.createTempDirectory( "gradle-environment-plugin-test" ).toFile();
+        testProject = new TestProject( "gradle-environment-plugin-test" );
     }
 
     @Test
     void testEnvironmentPluginWithoutEnvFile() throws IOException {
-        createProjectFile(
+        testProject.addFile(
                 "build.gradle",
                 """
                         plugins {
@@ -46,7 +42,7 @@ class EnvironmentPluginTest {
                         }
                         """
         );
-        createProjectFile(
+        testProject.addFile(
                 "src/main/java/Application.java",
                 """
                         class Application {
@@ -61,7 +57,7 @@ class EnvironmentPluginTest {
                         """
         );
         final BuildResult result = GradleRunner.create()
-                .withProjectDir( projectDir )
+                .withProjectDir( testProject.directory )
                 .withArguments( "run" )
                 .withPluginClasspath()
                 .build();
@@ -73,7 +69,7 @@ class EnvironmentPluginTest {
 
     @Test
     void testEnvironmentPlugin() throws IOException {
-        createProjectFile(
+        testProject.addFile(
                 "build.gradle",
                 """
                         plugins {
@@ -86,7 +82,7 @@ class EnvironmentPluginTest {
                         }
                         """
         );
-        createProjectFile(
+        testProject.addFile(
                 ".env",
                 """
                         API_TOKEN=test-token
@@ -94,7 +90,7 @@ class EnvironmentPluginTest {
                         MILLION=1000000
                         """
         );
-        createProjectFile(
+        testProject.addFile(
                 "src/main/java/Application.java",
                 """
                         class Application {
@@ -109,7 +105,7 @@ class EnvironmentPluginTest {
                         """
         );
         final BuildResult result = GradleRunner.create()
-                .withProjectDir( projectDir )
+                .withProjectDir( testProject.directory )
                 .withArguments( "run" )
                 .withPluginClasspath()
                 .build();
@@ -128,22 +124,5 @@ class EnvironmentPluginTest {
         final String environmentOutput = matcher.group( 1 ).trim();
         assertNotNull( environmentOutput, "Expected output not found" );
         assertArrayEquals( expectedOutput, environmentOutput.split( "\n" ) );
-    }
-
-    protected void createProjectFile( final String fileName, final String content ) throws IOException {
-        final File buildFile = new File( projectDir, fileName );
-        final File parentDir = buildFile.getParentFile();
-        if ( !parentDir.exists() && !parentDir.mkdirs() ) {
-            throw new IOException( "Can't create parent directory: " + parentDir );
-        }
-        try ( final OutputStream outputStream = new FileOutputStream( buildFile ) ) {
-            outputStream.write( content.getBytes() );
-        }
-    }
-
-    protected void assertProjectFile(
-            final String expectedFileName,
-            final String expectedFileContent ) throws IOException {
-        TestUtils.assertFileContents( projectDir, expectedFileName, expectedFileContent );
     }
 }
