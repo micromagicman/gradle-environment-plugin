@@ -23,6 +23,11 @@ import java.util.List;
 public class GenerateExampleEnvFileTask extends DefaultTask {
 
     /**
+     * Default name for {@link #outputFile output example .env file}.
+     */
+    public static final String OUTPUT_FILE_DEFAULT_FILENAME = ".env.example";
+
+    /**
      * A list of case-insensitive patterns used to identify environment variable names
      * whose values should be excluded from the generated example file.
      * <p>
@@ -38,7 +43,7 @@ public class GenerateExampleEnvFileTask extends DefaultTask {
      * but without sensitive values.
      */
     @OutputFile
-    private File outputFile;
+    private File outputFile = getProject().file( OUTPUT_FILE_DEFAULT_FILENAME );
 
     /**
      * Executes the task action to generate the example environment file.

@@ -11,6 +11,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static ru.micromagicman.gradle.environment.GenerateExampleEnvFileTask.OUTPUT_FILE_DEFAULT_FILENAME;
 
 class GenerateExampleEnvFileTaskTest {
 
@@ -45,8 +46,8 @@ class GenerateExampleEnvFileTaskTest {
         final BuildTask task = result.task( ":generateExampleEnvFile" );
         assertNotNull( task );
         assertEquals( TaskOutcome.SUCCESS, task.getOutcome() );
-        testProject.addFile(
-                ".env.example",
+        testProject.assertProjectFile(
+                OUTPUT_FILE_DEFAULT_FILENAME,
                 """
                         API_TOKEN=
                         OS_NAME=macos
@@ -79,8 +80,8 @@ class GenerateExampleEnvFileTaskTest {
         final BuildTask task = result.task( ":generateExampleEnvFile" );
         assertNotNull( task );
         assertEquals( TaskOutcome.SUCCESS, task.getOutcome() );
-        testProject.addFile(
-                ".env.example",
+        testProject.assertProjectFile(
+                OUTPUT_FILE_DEFAULT_FILENAME,
                 """
                         API_TOKEN=test-token
                         OS_NAME=macos
@@ -113,12 +114,42 @@ class GenerateExampleEnvFileTaskTest {
         final BuildTask task = result.task( ":generateExampleEnvFile" );
         assertNotNull( task );
         assertEquals( TaskOutcome.SUCCESS, task.getOutcome() );
-        testProject.addFile(
-                ".env.example",
+        testProject.assertProjectFile(
+                OUTPUT_FILE_DEFAULT_FILENAME,
                 """
                         API_TOKEN=
                         OS_NAME=
                         MILLION=                        
+                        """
+        );
+    }
+
+    @Test
+    void testCreateExampleEnvFileTaskWithoutAnyTaskInputSpecified() throws IOException {
+        testProject.addFile(
+                "build.gradle",
+                """
+                        plugins {
+                            id 'java'
+                            id 'application'
+                            id 'ru.micromagicman.environment'
+                        }                
+                        """
+        );
+        final BuildResult result = GradleRunner.create()
+                .withProjectDir( testProject.directory )
+                .withArguments( "generateExampleEnvFile" )
+                .withPluginClasspath()
+                .build();
+        final BuildTask task = result.task( ":generateExampleEnvFile" );
+        assertNotNull( task );
+        assertEquals( TaskOutcome.SUCCESS, task.getOutcome() );
+        testProject.assertProjectFile(
+                OUTPUT_FILE_DEFAULT_FILENAME,
+                """
+                        API_TOKEN=
+                        OS_NAME=macos
+                        MILLION=1000000                        
                         """
         );
     }
