@@ -13,14 +13,14 @@ This Gradle plugin automatically loads environment variables from a `.env` file 
 
 ### Add Plugin to Your Project
 
-#### Using plugins block (Gradle 2.1+)
+#### Using plugins block
 ```groovy
 plugins {
-    id 'ru.micromagicman.environment' version '0.1.0'
+    id 'ru.micromagicman.environment' version '0.2.0'
 }
 ```
 
-#### Using buildscript (for older Gradle versions)
+#### Using buildscript
 ```groovy
 buildscript {
     repositories {
@@ -34,6 +34,12 @@ buildscript {
 apply plugin: 'ru.micromagicman.environment'
 ```
 
+## How It Works
+The plugin scans all tasks in your project and applies the environment variables from the `.env` file to any task that implements `ProcessForkOptions`. This includes common tasks like:
+- `JavaExec`
+- `Test`
+- Custom tasks extending `AbstractRunnableTask`
+
 ## Usage
 
 1. **Create a `.env` file** in the root of your project.
@@ -46,11 +52,27 @@ apply plugin: 'ru.micromagicman.environment'
 
 3. **Apply the plugin** as described in the installation section.
 
-## How It Works
-The plugin scans all tasks in your project and applies the environment variables from the `.env` file to any task that implements `ProcessForkOptions`. This includes common tasks like:
-- `JavaExec`
-- `Test`
-- Custom tasks extending `AbstractRunnableTask`
+## Task Reference
+
+### `generateExampleEnvFile`
+
+Generates an example environment file with sensitive values removed based on patterns.
+
+#### **Properties**
+
+| Property | Type | Default Value | Description |
+|----------|------|---------------|-------------|
+| `outputFile` | `File` | `.env.example` | Target file path for the generated example environment file |
+| `excludeValuePatterns` | `List<String>` | `["password", "token"]` | Case-insensitive patterns to identify sensitive keys whose values should be excluded |
+
+#### Example
+
+```groovy
+generateExampleEnvFile {
+    outputFile = file("$projectDir/env.example")
+    excludeValuePatterns = ['password', 'secret', 'token']
+}
+```
 
 ## Limitations
 - Only supports tasks that implement `ProcessForkOptions`

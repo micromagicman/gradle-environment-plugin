@@ -67,7 +67,7 @@ class GenerateExampleEnvFileTaskTest {
                             id 'ru.micromagicman.environment'
                         }                
                         generateExampleEnvFile {
-                            excludeValuePatterns = []
+                            sensitiveValuePatterns = []
                             outputFile = file("$projectDir/.env.example")
                         }
                         """
@@ -101,7 +101,7 @@ class GenerateExampleEnvFileTaskTest {
                             id 'ru.micromagicman.environment'
                         }                
                         generateExampleEnvFile {
-                            excludeValuePatterns = ['token', 'os', 'million']
+                            sensitiveValuePatterns = ['token', 'os', 'million']
                             outputFile = file("$projectDir/.env.example")
                         }
                         """

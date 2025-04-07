@@ -28,13 +28,13 @@ public class GenerateExampleEnvFileTask extends DefaultTask {
     public static final String OUTPUT_FILE_DEFAULT_FILENAME = ".env.example";
 
     /**
-     * A list of case-insensitive patterns used to identify environment variable names
+     * A list of case-insensitive patterns used to identify environment sensitive variable names
      * whose values should be excluded from the generated example file.
      * <p>
      * By default, excludes variables containing "password" or "token" in their names.
      */
     @Input
-    private List<String> excludeValuePatterns = List.of( "password", "token" );
+    private List<String> sensitiveValuePatterns = List.of( "password", "token" );
 
     /**
      * The output file where the example environment configuration will be generated.
@@ -66,7 +66,7 @@ public class GenerateExampleEnvFileTask extends DefaultTask {
             }
             final EnvFile target = new EnvFile( outputFile.getParentFile(), outputFile.getName() );
             target.mergeWith( EnvFile.forProject( getProject() ), key -> {
-                for ( String pattern : excludeValuePatterns ) {
+                for ( String pattern : sensitiveValuePatterns ) {
                     if ( key.toLowerCase().contains( pattern ) ) {
                         return false;
                     }
