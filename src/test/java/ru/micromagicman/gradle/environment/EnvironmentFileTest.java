@@ -6,13 +6,15 @@ import org.gradle.internal.impldep.org.eclipse.jgit.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -30,7 +32,37 @@ class EnvironmentFileTest {
     }
 
     @Test
+    void testEnvironmentFileReadError() throws IOException {
+        final File tempDirectory = Files.createTempDirectory( "create-env" ).toFile();
+        final File envFile = new File( tempDirectory, ".env" );
+        assertTrue( envFile.createNewFile(), "Cannot create file" );
+        assertTrue( envFile.setReadable( false ), "Cannot set read = false flag for file" );
+        assertThrows(
+                RuntimeException.class,
+                () -> new EnvFile( tempDirectory, ".env" )
+        );
+    }
+
+    @Test
+    void testPutError() {
+        final EnvFile envFile = new EnvFile( null, ".env" );
+        assertThrows(
+                NullPointerException.class,
+                () -> envFile.put( null, "value" )
+        );
+    }
+
+    @Test
+    void testPutOk() {
+        final EnvFile envFile = new EnvFile( null, ".env" );
+        envFile.put( "key", "value" );
+        assertEquals( Map.of( "key", "value" ), envFile.all() );
+    }
+
+    @Test
     void testAll() {
+        final EnvFile envFile = envFileFromResources( "sample1.env" );
+        final Map<String, String> all = envFile.all();
         assertEquals(
                 Map.of(
                         "A", "2",
@@ -38,7 +70,11 @@ class EnvironmentFileTest {
                         "SOME_STRING", "hello world!",
                         "variable", "value"
                 ),
-                envFileFromResources( "sample1.env" ).all()
+                all
+        );
+        assertThrows(
+                UnsupportedOperationException.class,
+                () -> all.put( "A", "3" )
         );
     }
 
@@ -57,6 +93,36 @@ class EnvironmentFileTest {
         when( projectMock.getProjectDir() )
                 .thenReturn( new File( "src/test/resources" ) );
         assertDoesNotThrow( () -> EnvFile.forProject( projectMock ) );
+    }
+
+    @Test
+    void testFlushSuccess() throws IOException {
+        final TestProject testProject = new TestProject( "flush-test" );
+        final EnvFile envFile = new EnvFile( testProject.directory, ".env" );
+        envFile.put( "HELLO", "WORLD" );
+        envFile.put( "THIS_IS_TRUE", true );
+        envFile.put( "EMPTY", null );
+        envFile.flush();
+        testProject.assertProjectFile(
+                ".env",
+                """
+                        HELLO=WORLD
+                        THIS_IS_TRUE=true
+                        EMPTY=
+                        """
+        );
+    }
+
+    @Test
+    void testFlushWithError() throws IOException {
+        final File tempDirectory = Files.createTempDirectory( "flush-error-test" ).toFile();
+        final EnvFile envFile = new EnvFile( tempDirectory, ".env" );
+        envFile.put( "HELLO", "WORLD" );
+        assertTrue( tempDirectory.setWritable( false ), "Cannot set read-only dir" );
+        assertThrows(
+                RuntimeException.class,
+                envFile::flush
+        );
     }
 
     @NonNull

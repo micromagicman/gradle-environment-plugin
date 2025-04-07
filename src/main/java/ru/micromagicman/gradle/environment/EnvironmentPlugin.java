@@ -24,5 +24,6 @@ public class EnvironmentPlugin implements Plugin<Project> {
                 environmentFile.applyForTask( processForkTask );
             }
         } );
+        tasks.register( "generateExampleEnvFile", GenerateExampleEnvFileTask.class );
     }
 }
